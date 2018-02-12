@@ -1,0 +1,287 @@
+<html>
+<head>
+    <title>Canvas</title>
+</head>
+<body onload="start()">
+    <canvas id="canvas" width="1000" height="600" style="position:absolute;z-index:0;"></canvas>
+    <canvas id="canvas1" width="550" height="450" style="border:1px solid black;position:absolute;z-index:1;left:382;top:102;"></canvas>
+    <script type="text/javascript">
+        function start() {
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+            var canvas1 = document.getElementById('canvas1');
+            var context1 = canvas1.getContext('2d');
+            var container = {cx:0,cy:0,width:550,height:450};
+            var circle = {cx:275,cy:390,cr:15,cvx:0,cvy:0,mass:7};
+            var friction = 0.99;
+            var friction1 = 0.96;
+            var mouseX;
+            var mouseY;
+            var ux;
+            var uy;
+            var u;
+            var v;
+            var p = 650-374;
+            var q = 95+450/2-94;
+            var radia = Math.PI/6;
+            var radian = Math.PI/3;
+            var cookies = [{cx:650-374,cy:95+450/2-94,cr:10,cvx:0,cvy:0,color: "#800000",mass:5},
+                {cx:24*Math.cos(4.5*radian)+p,cy:24*Math.sin(radian)+q,cr:10,cvx:0,cvy:0,color:"#bf8040",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:24*Math.cos(1.5*radian)+p,cy:24*Math.sin(-radian)+q,cr:10,cvx:0,cvy:0,color:"#262626",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:26*Math.cos(9/4*radian)+p,cy:14*Math.sin(9/4*radian)+q,cr:10,cvx:0,cvy:0,color:"#262626",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:26*Math.cos(9/4*radian)+p,cy:16*Math.sin(-9/4*radian)+q,cr:10,cvx:0,cvy:0,color:"#bf8040",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:26*Math.cos(3/4*radian)+p,cy:14*Math.sin(3/4*radian)+q,cr:10,cvx:0,cvy:0,color:"#262626",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:26*Math.cos(3/4*radian)+p,cy:16*Math.sin(-3/4*radian)+q,cr:10,cvx:0,cvy:0,color:"#bf8040",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:24*Math.cos(4.5*radian)+p,cy:48*Math.sin(radian)+q,cr:10,cvx:0,cvy:0,color:"#bf8040",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:24*Math.cos(1.5*radian)+p,cy:48*Math.sin(-radian)+q,cr:10,cvx:0,cvy:0,color:"#bf8040",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:37*Math.cos(3*radian)+p,cy:48*Math.sin(3*radian)+q,cr:10,cvx:0,cvy:0,color:"#262626",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:37*Math.cos(0*radian)+p,cy:48*Math.sin(0*radian)+q,cr:10,cvx:0,cvy:0,color:"#262626",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:43*Math.cos(radia)+p,cy:42*Math.sin(-radia)+q,cr:10,cvx:0,cvy:0,color:"#bf8040",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:43*Math.cos(radia)+p,cy:42*Math.sin(radia)+q,cr:10,cvx:0,cvy:0,color:"#bf8040",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:43*Math.cos(5*radia)+p,cy:42*Math.sin(-5*radia)+q,cr:10,cvx:0,cvy:0,color:"#bf8040",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:43*Math.cos(5*radia)+p,cy:42*Math.sin(5*radia)+q,cr:10,cvx:0,cvy:0,color:"#bf8040",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:39*Math.cos(2*radia)+p,cy:39*Math.sin(-2*radia)+q,cr:10,cvx:0,cvy:0,color:"#262626",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:39*Math.cos(2*radia)+p,cy:39*Math.sin(2*radia)+q,cr:10,cvx:0,cvy:0,color:"#262626",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:39*Math.cos(4*radia)+p,cy:39*Math.sin(-4*radia)+q,cr:10,cvx:0,cvy:0,color:"#262626",mass:5,cu:0,cux:0,cuy:0,cv:0},
+                {cx:39*Math.cos(4*radia)+p,cy:39*Math.sin(4*radia)+q,cr:10,cvx:0,cvy:0,color:"#262626",mass:5,cu:0,cux:0,cuy:0,cv:0}];
+
+            DrawRectangle(context,350,70,600,500,1); // create rectangle ...
+            DrawRectangle(context,375,95,550,450,2);
+
+            DrawInsideLine(context,475,145,825,145);
+            DrawInsideLine(context,475,165,825,165); // 10 radious...
+
+            DrawInsideLine(context,475,495,825,495);
+            DrawInsideLine(context,475,475,825,475);
+            // Vertical lines....
+            DrawInsideLine(context,465,175,465,465);
+            DrawInsideLine(context,835,175,835,465);
+
+            DrawInsideLine(context,445,175,445,465);
+            DrawInsideLine(context,855,175,855,465);
+
+            DrawCircles(context,375+5,95+5,30,0,4*Math.PI/2,1);
+            DrawCircles(context,925-5,95+5,30,0,4*Math.PI/2,1);
+            DrawCircles(context,375+5,545-5,30,0,4*Math.PI/2,1);
+            DrawCircles(context,925-5,545-5,30,0,4*Math.PI/2,1);
+
+
+            DrawRectangle(context,350,70,600,500,3);
+
+            // Centered Circle....
+            DrawCircles(context,650,95+450/2,50,0,2*Math.PI,2);
+            DrawCircles(context,650,95+450/2,52,0,2*Math.PI,2);
+            DrawCircles(context,650,95+450/2,15,0,2*Math.PI,1);
+            //eight circles...
+            DrawCircles(context,475,155,10,0,2*Math.PI,2);
+            DrawCircles(context,475,155,8,0,2*Math.PI,3);
+
+            DrawCircles(context,825,155,10,0,2*Math.PI,2);
+            DrawCircles(context,825,155,8,0,2*Math.PI,3);
+
+            DrawCircles(context,475,485,10,0,2*Math.PI,2);
+            DrawCircles(context,475,485,8,0,2*Math.PI,3);
+
+            DrawCircles(context,825,485,10,0,2*Math.PI,2);
+            DrawCircles(context,825,485,8,0,2*Math.PI,3);
+
+            DrawCircles(context,455,175,10,0,2*Math.PI,2);
+            DrawCircles(context,455,175,8,0,2*Math.PI,3);
+
+            DrawCircles(context,455,465,10,0,2*Math.PI,2);
+            DrawCircles(context,455,465,8,0,2*Math.PI,3);
+
+            DrawCircles(context,845,175,10,0,2*Math.PI,2);
+            DrawCircles(context,845,175,8,0,2*Math.PI,3);
+
+            DrawCircles(context,845,465,10,0,2*Math.PI,2);
+            DrawCircles(context,845,465,8,0,2*Math.PI,3);
+
+            //Draw angled lines...
+
+            DrawInsideLine(context,350+70,70+57,650-100,95+450/2-83);
+            DrawInsideLine(context,650+100,95+450/2+83,950-70,570-57);
+            DrawInsideLine(context,350+70,570-57,650-100,95+450/2+83);
+            DrawInsideLine(context,950-70,70+57,650+100,95+450/2-83);
+
+            //draw small circles...
+            DrawCircles(context,465,165,5,0,2*Math.PI);
+            DrawCircles(context,835,165,5,0,2*Math.PI);
+            DrawCircles(context,465,475,5,0,2*Math.PI);
+            DrawCircles(context,835,475,5,0,2*Math.PI);
+
+            //draw curves....
+            DrawCircles(context,650-123,95+450/2-103,30,3*Math.PI/2,Math.PI);
+            DrawCircles(context,650+123,95+450/2+103,30,Math.PI/2,0);
+            DrawCircles(context,650-123,95+450/2+103,30,Math.PI,Math.PI/2);
+            DrawCircles(context,650+123,95+450/2-103,30,0,3*Math.PI/2);
+
+            function DrawCookies(context,posx,posy,radious,start_angle,end_angle,color) {
+                context.beginPath();
+                context.arc(posx,posy,radious,start_angle,end_angle);
+                context.stroke();
+                context.fillStyle = color;
+                context.fill();
+            }
+            function drawcookies(r) {
+                context1.beginPath();
+                context1.arc(cookies[r].cx, cookies[r].cy,10, 0, Math.PI * 2, true);
+                context1.closePath();
+                context1.fillStyle = cookies[r].color;
+                context1.fill();
+                context1.beginPath();
+                context1.arc(cookies[r].cx, cookies[r].cy,7, 0, Math.PI * 2, true);
+                context1.strokeStyle = 'black';
+                context1.stroke();
+            }
+            function DrawRectangle(context,posx,posy,width,height,code){
+                context.beginPath();
+                context.rect(posx,posy,width,height);
+                if(code == 1){
+                    context.fillStyle = "#392613";
+                    context.fill();
+                }
+                else if (code == 2) {
+                    context.fillStyle = "#d9b38c";
+                    context.fill();
+                }
+                else if (code == 3) {
+                    lineWidth = 150;
+                }
+                context.strokeStyle = 'black';
+                context.stroke();
+            }
+            function DrawInsideLine(context,posx,posy,movex,movey){
+                context.beginPath();
+                context.moveTo(posx,posy);
+                context.lineTo(movex,movey);
+                context.stroke();
+            }
+            function DrawCircles(context,posx,posy,radious,start_angle,end_angle,code){
+                context.beginPath();
+                context.arc(posx,posy,radious,start_angle,end_angle);
+                context.stroke();
+                if(code==1){
+                    context.fillStyle = 'black';
+                    context.fill();
+                }
+                else if(code==3){
+                    context.fillStyle = '#b30000';
+                    context.fill();
+                }
+            }
+            function DrawStriker(context,posx,posy,radious,start_angle,end_angle){
+                context.beginPath();
+                context.arc(posx,posy,radious,start_angle,end_angle);
+                context.stroke();
+                context.fillStyle = '#000080';
+                context.fill();
+            }
+            function clear() {
+                context1.save();
+                context1.globalCompositeOperation = 'copy';
+                context1.beginPath();
+                context1.arc(circle.cx, circle.cy, 15, 0, 2 * Math.PI, false);
+                context1.fill();
+                context1.restore();
+            }
+            function collideBalls(cookie1,cookie2) {
+                var dx = cookie1.cx - cookie2.cx;
+                var dy = cookie1.cy - cookie2.cy;
+                var collisionAngle = Math.atan2(dy, dx);
+                //console.log(collisionAngle);
+                var speed1 = Math.sqrt(cookie1.cvx * cookie1.cvx + cookie1.cvy * cookie1.cvy);
+                var speed2 = Math.sqrt(cookie2.cvx * cookie2.cvx + cookie2.cvy * cookie2.cvy);
+
+                var direction1 = Math.atan2(cookie1.cvy, cookie1.cvx);
+                var direction2 = Math.atan2(cookie2.cvy, cookie2.cvx);
+
+                var speedX1 = speed1 * Math.cos(direction1 - collisionAngle);
+                var speedY1 = speed1 * Math.sin(direction1 - collisionAngle);
+                var speedX2 = speed2 * Math.cos(direction2 - collisionAngle);
+                var speedY2 = speed2 * Math.sin(direction2 - collisionAngle);
+
+                var final_speedX1 = ((cookie1.mass - cookie2.mass) * speedX1 + (cookie2.mass + cookie2.mass) * speedX2)/(cookie1.mass + cookie2.mass);
+                var final_speedX2 = ((cookie1.mass + cookie1.mass) * speedX1 + (cookie2.mass - cookie1.mass) * speedX2)/(cookie1.mass + cookie2.mass);
+
+                var final_speedY1 = speedY1;
+                var final_speedY2 = speedY2;
+                cookie1.cvx = Math.cos(collisionAngle) * final_speedX1 + Math.cos(collisionAngle + Math.PI/2) * final_speedY1;
+                cookie1.cvy = Math.sin(collisionAngle) * final_speedX1 + Math.sin(collisionAngle + Math.PI/2) * final_speedY1;
+                cookie2.cvx = Math.cos(collisionAngle) * final_speedX2 + Math.cos(collisionAngle + Math.PI/2) * final_speedY2;
+                cookie2.cvy = Math.sin(collisionAngle) * final_speedX2 + Math.sin(collisionAngle + Math.PI/2) * final_speedY2;
+            }
+            function hit(cookie1,cookie2) {
+               var ret = false;
+               var dx = cookie1.cx - cookie2.cx;
+               var dy = cookie1.cy - cookie2.cy;
+               var distance = Math.sqrt(dx * dx + dy * dy);
+               if (distance<= (cookie1.cr + cookie2.cr) ) {
+                    ret = true;
+               }
+               return ret;
+            }
+            function collison()
+            {
+                for (var i = 0; i<19; i++) {
+                    if (hit(circle,cookies[i])) {
+                        collideBalls(circle,cookies[i]);
+                    }
+                }
+                for (var i = 0; i < 19; i++) {
+                    c1 = cookies[i];
+                    for (var j = i+1; j < 19; j++) {
+                        c2 = cookies[j];
+                        if (hit(c1,c2)) {
+                            collideBalls(c1,c2);
+                        }
+                    }
+                }
+            }
+            function draw() {
+                clear();
+                DrawStriker(context1,circle.cx,circle.cy,15,0,2*Math.PI);
+                for(var i=0 ;i< 19 ;i++)
+                {
+                    DrawCookies(context1,cookies[i].cx,cookies[i].cy,cookies[i].cr,0,2*Math.PI,cookies[i].color);
+                }
+                if((circle.cx+circle.cvx+circle.cr>container.cx+container.width) || (circle.cx-circle.cr+circle.cvx<container.cx)){
+                    circle.cvx = -circle.cvx;
+                }
+                if((circle.cy+circle.cvy+circle.cr>container.cy+container.height) || (circle.cy-circle.cr+circle.cvy<container.cy)){
+                    circle.cvy = -circle.cvy;
+                }
+                circle.cvx *= friction;
+                circle.cvy *= friction;
+                circle.cx += circle.cvx;
+                circle.cy += circle.cvy;
+                collison();
+                for(i=0 ;i< 19 ;i++)
+                {
+                    cookies[i].cvx *= friction1;
+                    cookies[i].cvy *= friction1;
+                    cookies[i].cx += cookies[i].cvx;
+                    cookies[i].cy += cookies[i].cvy;
+                    if((cookies[i].cx+cookies[i].cvx+cookies[i].cr>container.cx+container.width) || (cookies[i].cx-cookies[i].cr+cookies[i].cvx<container.cx)){
+                        cookies[i].cvx = -cookies[i].cvx;
+                    }
+                    if((cookies[i].cy+cookies[i].cvy+cookies[i].cr>container.cy+container.height) || (cookies[i].cy-cookies[i].cr+cookies[i].cvy<container.cy)){
+                        cookies[i].cvy = -cookies[i].cvy;
+                    }
+                    drawcookies(i);
+                }
+                requestAnimationFrame(draw);
+            }
+            requestAnimationFrame(draw);
+            canvas1.addEventListener('click', function(e) {
+                mouseX = e.pageX-382;
+                mouseY = e.pageY-102;
+                ux = circle.cx - mouseX;
+                uy = circle.cy - mouseY;
+                circle.cvx = ux*0.15;
+                circle.cvy = uy*0.15;
+            });
+        } // end of start....
+    </script>
+</body>
+</html>
